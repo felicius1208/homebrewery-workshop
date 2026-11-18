@@ -1,0 +1,1361 @@
+<title>Homebrewery Workshop</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Typ-Auswahl als Kartenraster, danach ein Formular-Editor mit mitlaufender Homebrewery-Code-Ausgabe. */
+:root {
+  --bg: #F3F1EC;
+  --surface: #FFFFFF;
+  --field: #FFFFFF;
+  --field-off: #F1F2F4;
+  --tb: #EEF0F2;
+  --fg: #181D23;
+  --muted: #5A6470;
+  --line: #D6D9DE;
+  --field-line: #C5D0E4;
+  --bar: #1F272D;
+  --bar-fg: #E9EDF0;
+  --btn: #3FC4F4;
+  --btn-fg: #06151D;
+  --btn-dis: #CDEFFB;
+  --btn-dis-fg: #82AFC0;
+  --danger: #B3261E;
+  --ok: #1B7A4B;
+  --code-bg: #151A20;
+  --code-fg: #E3E7EE;
+  --code-muted: #8B95A5;
+  --f-body: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-cond: 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161B; --surface: #1B2128; --field: #11161C; --field-off: #171D24; --tb: #232B34;
+    --fg: #E6E9ED; --muted: #98A2AE; --line: #2B333D; --field-line: #38445C;
+    --bar: #0C1014; --bar-fg: #E9EDF0; --btn-dis: #1B3440; --btn-dis-fg: #5E8797;
+    --danger: #F2867F; --ok: #5ED39A; --code-bg: #0B0E12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161B; --surface: #1B2128; --field: #11161C; --field-off: #171D24; --tb: #232B34;
+  --fg: #E6E9ED; --muted: #98A2AE; --line: #2B333D; --field-line: #38445C;
+  --bar: #0C1014; --bar-fg: #E9EDF0; --btn-dis: #1B3440; --btn-dis-fg: #5E8797;
+  --danger: #F2867F; --ok: #5ED39A; --code-bg: #0B0E12;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body); }
+.in {
+  max-width: 1280px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.main { padding-block: 22px 28px; }
+.about { padding-block: 0 36px; font-size: 12px; line-height: 1.5; color: var(--muted); max-width: 90ch; }
+h1, h2, h3 { margin: 0; font-family: var(--f-cond); text-wrap: balance; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--btn); outline-offset: 2px; }
+
+/* Kopfleiste */
+.bar { background: var(--bar); color: var(--bar-fg); }
+.barin { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 24px; padding-block: 12px; }
+.brand { font: 700 20px/1 var(--f-cond); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.nav a { font: 700 13px/1 var(--f-cond); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; padding: 8px 0; border-bottom: 2px solid transparent; color: var(--bar-fg); opacity: .82; }
+.nav a:hover { opacity: 1; }
+.nav a.on { opacity: 1; border-bottom-color: var(--btn); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center; gap: 6px;
+  font: 700 12px/1.15 var(--f-cond); letter-spacing: .05em; text-transform: uppercase; text-decoration: none;
+  padding: 13px 16px; border: 0; border-radius: 2px; cursor: pointer;
+  background: var(--btn); color: var(--btn-fg);
+}
+.btn:hover { filter: brightness(1.07); }
+.btn:disabled { background: var(--btn-dis); color: var(--btn-dis-fg); cursor: not-allowed; filter: none; }
+.btn.dark { background: #000; color: #fff; box-shadow: inset 0 0 0 2px var(--btn); }
+.btn.line { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--field-line); }
+.btn.sm { padding: 9px 12px; }
+.btn.armed { background: var(--danger); color: #fff; box-shadow: none; }
+
+/* Startseite */
+.lead { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+.cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.card {
+  --acc: #555;
+  position: relative; min-width: 0; min-height: 270px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 30px 22px; text-align: center; color: #fff; border-radius: 3px; overflow: hidden;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 2px, transparent 2px 12px),
+    linear-gradient(135deg, color-mix(in srgb, var(--acc) 46%, #10151A), #10151A 72%);
+}
+.card h2 { font: 400 2.1rem/1.1 var(--f-body); }
+.card p { margin: 0; max-width: 46ch; min-height: 3em; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.cbtns { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 6px; }
+@media (min-width: 740px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 10px); }
+}
+
+/* Unterseiten */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; background: var(--surface); border: 1px solid var(--line); padding: 8px 12px; border-radius: 3px; font: 700 11px/1 var(--f-cond); text-transform: uppercase; letter-spacing: .03em; }
+.crumbs a, .crumbs span { text-decoration: none; }
+.crumbs > * + *::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 10px 1px; border-right: 1.5px solid var(--muted); border-top: 1.5px solid var(--muted); transform: rotate(45deg); }
+.crumbs .cur { color: var(--muted); }
+.topbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.ptitle { font: 700 2.1rem/1.1 var(--f-cond); padding-bottom: 12px; border-bottom: 3px solid var(--acc, var(--btn)); margin-bottom: 22px; }
+
+.picker { max-width: 600px; margin: 40px auto 0; background: var(--surface); border: 1px solid var(--line); padding: 28px 40px 36px; text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,.14); }
+.picker h1 { font-size: 2.1rem; font-weight: 700; margin-bottom: 26px; }
+.picker label { display: block; font: 500 1.05rem var(--f-body); margin-bottom: 10px; }
+.picker .btn { width: 60%; min-width: 220px; padding: 17px; margin: 24px 0; }
+.or { display: flex; align-items: center; gap: 16px; font: 700 14px var(--f-cond); color: var(--fg); }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--btn); }
+
+/* Editor */
+.editor { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1120px) {
+  .editor { grid-template-columns: minmax(0, 1fr) 440px; align-items: start; }
+  .out-panel { position: sticky; top: 16px; max-height: calc(100vh - 32px); }
+}
+.form { container-type: inline-size; min-width: 0; }
+.fgrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px 16px; }
+.sec { grid-column: 1 / -1; }
+.sec h2 { font: 700 1.15rem/1.2 var(--f-cond); text-transform: uppercase; letter-spacing: .01em; }
+.sec-help { margin: 4px 0 0; color: var(--muted); }
+.fld { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+@container (min-width: 620px) { .fld { grid-column: span var(--cols, 12); } }
+.lh { display: flex; align-items: center; gap: 6px; min-height: 18px; }
+.lab { font: 700 12px/1.2 var(--f-cond); text-transform: uppercase; letter-spacing: .02em; }
+.lab.ghost { visibility: hidden; }
+.req { color: var(--danger); }
+.q { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 0; background: var(--fg); color: var(--bg); font: 700 11px/16px var(--f-body); cursor: pointer; flex: 0 0 auto; }
+.help { margin: 0; font-size: 13px; color: var(--muted); }
+.hint { margin: 0; font-size: 12px; color: var(--muted); }
+input[type=text], input[type=number], select, textarea {
+  width: 100%; font: 15px/1.4 var(--f-body); color: var(--fg); background: var(--field);
+  border: 1px solid var(--field-line); border-radius: 2px; padding: 12px;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .7; }
+select { padding-right: 8px; }
+.fld.off { opacity: .55; }
+.fld.off input, .fld.off select, .fld.off textarea { background: var(--field-off); }
+.fld.off .btn, .fld.off .tg, .fld.off .chip { cursor: not-allowed; }
+.modv { font: 500 13px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.chk { display: flex; align-items: center; gap: 10px; font: 700 12px/1.2 var(--f-cond); text-transform: uppercase; cursor: pointer; padding-top: 22px; }
+.chk input { width: 20px; height: 20px; margin: 0; accent-color: var(--btn); }
+.tgs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tg { width: 48px; height: 48px; font: 700 15px var(--f-body); color: var(--fg); background: var(--field); border: 1px solid var(--field-line); border-radius: 2px; cursor: pointer; }
+.tg[aria-pressed="true"] { background: var(--btn); color: var(--btn-fg); border-color: var(--btn); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 700 12px/1 var(--f-cond); text-transform: uppercase; letter-spacing: .03em; padding: 10px 12px; color: var(--fg); background: var(--field); border: 1px solid var(--field-line); border-radius: 2px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--btn); color: var(--btn-fg); border-color: var(--btn); }
+
+/* Rich-Text-Leiste */
+.rte { border: 1px solid var(--field-line); background: var(--field); }
+.arow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.arow select { flex: 1 1 140px; min-width: 0; }
+.athumb { width: 44px; height: 44px; object-fit: cover; border: 1px solid var(--field-line); }
+.bgp { padding: 10px 14px; background: rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.1); }
+.bgc { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.bgl { display: flex; flex-direction: column; gap: 4px; font: 700 11px var(--f-cond); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.bgp .bgl { color: var(--code-muted); }
+.bgl select { min-width: 140px; }
+.bgl input[type=color] { width: 56px; height: 36px; padding: 2px; border: 1px solid var(--field-line); background: var(--field); cursor: pointer; }
+.imgp { border-bottom: 1px solid var(--field-line); padding: 8px; background: var(--field); }
+.aph { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.apm { font-size: 13px; color: var(--muted); }
+.out-panel .apm { color: var(--code-muted); }
+.apg { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; max-height: 220px; overflow: auto; }
+.apt { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 4px; border: 1px solid var(--field-line); background: var(--surface); color: var(--fg); cursor: pointer; font: 500 11px var(--f-body); }
+.apt img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.apt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adrop { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 22px; border: 2px dashed var(--field-line); background: var(--surface); margin-bottom: 20px; }
+.adrop.over { border-color: var(--btn); }
+.agrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.atile { min-width: 0; display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--surface); }
+.atile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #8a8a8a; }
+.atile .am { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; min-width: 0; }
+.atile .an { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.atile .ab { display: flex; flex-wrap: wrap; gap: 6px; }
+.asub { margin: 24px 0 10px; font: 700 1.15rem var(--f-cond); text-transform: uppercase; letter-spacing: .03em; }
+.hintimg { margin-top: 8px; color: #F2C46B; }
+.tb { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px 6px; background: var(--tb); border-bottom: 1px solid var(--field-line); }
+.tb button, .tb select { height: 28px; min-width: 30px; padding: 0 8px; font: 500 13px var(--f-body); color: var(--fg); background: transparent; border: 1px solid transparent; border-radius: 2px; cursor: pointer; }
+.tb select { width: auto; border-color: var(--field-line); padding: 0 4px; font-size: 13px; background: var(--field); }
+.tb button:hover { background: var(--field); border-color: var(--field-line); }
+.tb .sep { width: 1px; height: 18px; background: var(--field-line); margin: 0 4px; }
+.rte textarea { display: block; border: 0; border-radius: 0; min-height: 120px; resize: vertical; font: 13.5px/1.6 var(--f-mono); }
+.fld.off .tb button, .fld.off .tb select { pointer-events: none; }
+
+/* Wiederholbare Einträge */
+.rep { display: flex; flex-direction: column; gap: 12px; }
+.ritem { background: var(--surface); border: 1px solid var(--line); padding: 14px; }
+.rhead { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.rhead strong { flex: 1; font: 700 13px var(--f-cond); text-transform: uppercase; letter-spacing: .03em; }
+.iact { min-width: 32px; height: 32px; padding: 0 8px; background: transparent; border: 1px solid var(--field-line); color: var(--fg); font: 500 14px var(--f-body); cursor: pointer; border-radius: 2px; }
+.iact:hover { background: var(--field-off); }
+.iact.armed { background: var(--danger); border-color: var(--danger); color: #fff; font-size: 12px; }
+.repadd { align-self: flex-start; }
+
+.edfoot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding-top: 18px; }
+.status { font-size: 13px; color: var(--muted); flex: 1; min-width: 200px; }
+.status.ok { color: var(--ok); }
+
+/* Ausgabe */
+.out-panel { display: flex; flex-direction: column; min-height: 0; background: var(--code-bg); color: var(--code-fg); border-radius: 3px; overflow: hidden; }
+.out-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.out-head h2 { font: 700 15px var(--f-cond); text-transform: uppercase; letter-spacing: .05em; }
+.out-head .meta { font-size: 12px; color: var(--code-muted); font-variant-numeric: tabular-nums; }
+.out-act { display: flex; align-items: center; gap: 10px; }
+.cstatus { font-size: 12px; color: var(--code-muted); }
+.out-panel pre { margin: 0; padding: 14px; flex: 1; min-height: 240px; max-height: 68vh; overflow: auto; font: 12.5px/1.6 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+@media (min-width: 1120px) { .out-panel pre { max-height: none; } }
+.otabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 8px 10px 0; background: rgba(255,255,255,.04); }
+.otab { font: 700 12px/1 var(--f-cond); letter-spacing: .05em; text-transform: uppercase; padding: 10px 14px; color: var(--code-muted); background: transparent; border: 0; border-bottom: 2px solid transparent; cursor: pointer; }
+.otab[aria-selected="true"] { color: var(--code-fg); border-bottom-color: var(--btn); }
+.otools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; padding-bottom: 6px; }
+.zb { min-width: 30px; height: 28px; padding: 0 8px; font: 700 12px var(--f-cond); letter-spacing: .04em; text-transform: uppercase; color: var(--code-fg); background: transparent; border: 1px solid rgba(255,255,255,.22); border-radius: 2px; cursor: pointer; }
+.zb:hover { background: rgba(255,255,255,.1); }
+.psw { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center; height: 28px; margin-right: 4px; border: 1px solid rgba(255,255,255,.22); border-radius: 14px; background: rgba(255,255,255,.05); }
+.psw-thumb { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); border-radius: 12px; background: var(--btn); transition: transform .16s ease; }
+.psw[data-v="letter"] .psw-thumb { transform: translateX(100%); }
+.psw-b { position: relative; z-index: 1; min-width: 46px; height: 100%; padding: 0 10px; font: 700 12px var(--f-cond); letter-spacing: .04em; text-transform: uppercase; color: var(--code-muted); background: transparent; border: 0; border-radius: 14px; cursor: pointer; }
+.psw-b[aria-checked="true"] { color: var(--btn-fg); }
+.zl { font-size: 12px; color: var(--code-muted); min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; }
+.pv { flex: 1; min-height: 360px; max-height: 78vh; overflow: auto; background: #2C3C52; padding: 12px; }
+@media (min-width: 1120px) { .pv { max-height: none; } }
+.out-panel.full { position: fixed; inset: 0; z-index: 60; max-height: none; border-radius: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.out-panel.full .pv, .out-panel.full pre { max-height: none; }
+@media (min-width: 1400px) { .editor { grid-template-columns: minmax(0, 1fr) 500px; } }
+@media (min-width: 1800px) { .editor { grid-template-columns: minmax(0, 1fr) 640px; } }
+.out-panel pre:empty::before { content: attr(data-empty); color: var(--code-muted); }
+.out-foot { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.1); font-size: 13px; color: var(--code-muted); }
+.out-foot a { color: var(--code-fg); }
+
+/* Meine Kreationen */
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.fchip { font: 700 12px/1 var(--f-cond); text-transform: uppercase; letter-spacing: .03em; padding: 10px 12px; text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 2px; }
+.fchip.on { background: var(--bar); color: #fff; border-color: var(--bar); }
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row { --acc: #555; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--acc); padding: 10px 12px; }
+.row input[type=checkbox] { width: 20px; height: 20px; margin: 0; accent-color: var(--btn); flex: 0 0 auto; }
+.rmain { flex: 1 1 220px; min-width: 0; }
+.rname { font: 700 16px/1.2 var(--f-cond); overflow-wrap: anywhere; }
+.rmeta { font-size: 13px; color: var(--muted); }
+.badge { font: 700 11px/1 var(--f-cond); text-transform: uppercase; letter-spacing: .05em; padding: 5px 7px; color: #fff; background: var(--acc); border-radius: 2px; flex: 0 0 auto; }
+.ract { display: flex; flex-wrap: wrap; gap: 6px; }
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 12px; }
+.tools label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.tools input { accent-color: var(--btn); }
+.empty { border: 1px dashed var(--field-line); padding: 36px 16px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.note { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--danger); padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<div id="app"></div>
+
+<script>/*__HBFM__*/</script>
+<script>
+(() => {
+  const HB_THEME = /*__THEME__*/;
+  const HB_FONTS = /*__FONTS__*/;
+  const STANDALONE = /*__STANDALONE__*/;
+  'use strict';
+
+  /* ---------- Helfer ---------- */
+  const S = v => String(v == null ? '' : v).trim();
+  const lower = v => S(v).toLowerCase();
+  const cap = v => { v = S(v); return v.charAt(0).toUpperCase() + v.slice(1); };
+  const ord = n => { n = +n; const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const plural = (n, w) => n + ' ' + w + (+n === 1 ? '' : 's');
+  const mod = n => { const v = Math.floor((+n - 10) / 2); return isNaN(v) ? '+0' : (v >= 0 ? '+' + v : String(v)); };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const isEmpty = v => Array.isArray(v) ? v.length === 0 : S(v) === '';
+  let uid = 0;
+  const newId = () => 'c' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36);
+
+  function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      const v = attrs[k];
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k === 'value') e.value = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    kids.flat().forEach(c => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); });
+    return e;
+  }
+
+  /* ---------- Spieldaten ---------- */
+  const CLASSES = ['Artificer', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'];
+  const SUBTERM = { Artificer: 'Artificer Specialist', Barbarian: 'Primal Path', Bard: 'Bard College', Cleric: 'Divine Domain', Druid: 'Druid Circle', Fighter: 'Martial Archetype', Monk: 'Monastic Tradition', Paladin: 'Sacred Oath', Ranger: 'Ranger Archetype', Rogue: 'Roguish Archetype', Sorcerer: 'Sorcerous Origin', Warlock: 'Otherworldly Patron', Wizard: 'Arcane Tradition' };
+  const SCHOOLS = ['Abjuration', 'Conjuration', 'Divination', 'Enchantment', 'Evocation', 'Illusion', 'Necromancy', 'Transmutation'];
+  const SPELL_LEVELS = [['0', 'Cantrip']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => [String(n), ord(n) + ' Level']));
+  const CT = [['action', 'Action'], ['bonus action', 'Bonus Action'], ['reaction', 'Reaction'], ['minute', 'Minute'], ['hour', 'Hour'], ['no action', 'No Action'], ['special', 'Special']];
+  const RANGES = [['self', 'Self'], ['touch', 'Touch'], ['ranged', 'Ranged'], ['sight', 'Sight'], ['unlimited', 'Unlimited']];
+  const DURS = [['instant', 'Instantaneous'], ['time', 'Time'], ['conc', 'Concentration'], ['disp', 'Until Dispelled'], ['trig', 'Until Dispelled or Triggered'], ['special', 'Special']];
+  const DUNIT = [['round', 'Round'], ['minute', 'Minute'], ['hour', 'Hour'], ['day', 'Day']];
+  const ITEM_TYPES = ['Armor', 'Potion', 'Ring', 'Rod', 'Scroll', 'Staff', 'Wand', 'Weapon', 'Wondrous Item'];
+  const RARITIES = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Artifact', 'Varies'];
+  const SIZES = ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan'];
+  const MTYPES = ['aberration', 'beast', 'celestial', 'construct', 'dragon', 'elemental', 'fey', 'fiend', 'giant', 'humanoid', 'monstrosity', 'ooze', 'plant', 'undead'];
+  const ALIGNS = ['unaligned', 'any alignment', 'lawful good', 'neutral good', 'chaotic good', 'lawful neutral', 'neutral', 'chaotic neutral', 'lawful evil', 'neutral evil', 'chaotic evil', 'any non-good alignment', 'any evil alignment'];
+  const XP = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, '1': 200, '2': 450, '3': 700, '4': 1100, '5': 1800, '6': 2300, '7': 2900, '8': 3900, '9': 5000, '10': 5900, '11': 7200, '12': 8400, '13': 10000, '14': 11500, '15': 13000, '16': 15000, '17': 18000, '18': 20000, '19': 22000, '20': 25000, '21': 33000, '22': 41000, '23': 50000, '24': 62000, '25': 75000, '26': 90000, '27': 105000, '28': 120000, '29': 135000, '30': 155000 };
+  const CRS = Object.keys(XP).map(k => [k, k + ' (' + XP[k].toLocaleString('en-US') + ' XP)']);
+  const AB = [['str', 'STR'], ['dex', 'DEX'], ['con', 'CON'], ['int', 'INT'], ['wis', 'WIS'], ['cha', 'CHA']];
+  const FEAT_CATS = ['General', 'Origin', 'Fighting Style', 'Epic Boon'];
+
+  /* Einträge "Name. Text" je Zeile werden zu ***Name.*** Text */
+  const rules = t => S(t).split(/\n+/).map(S).filter(Boolean).map(l => {
+    if (/^[*#>|{\-]/.test(l)) return l;
+    const m = l.match(/^([^.\n*]{1,60}?)\.\s+(.+)$/);
+    return m ? '***' + m[1] + '.*** ' + m[2] : l;
+  }).join('\n\n');
+  const props = pairs => pairs.filter(p => S(p[1])).map(p => '**' + p[0] + ':** ' + S(p[1])).join('  \n');
+
+  const abilityFields = AB.map(a => ({ k: a[0], l: a[1], t: 'num', cols: 2, def: '10', mod: true, min: 1, max: 30 }));
+
+  /* ---------- Typen mit Formular-Schema und Code-Erzeugung ---------- */
+  const TYPES = {
+    background: {
+      name: 'Background', plural: 'Backgrounds', color: '#B7791F',
+      blurb: 'Describe where a character comes from, with proficiencies, equipment and a feature.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Start with a name and the description that goes into your book.' },
+        { k: 'name', l: 'Name', t: 'text', req: 1, cols: 8, help: 'The name of the background.' },
+        { k: 'version', l: 'Version', t: 'text', cols: 4, ph: '1, 1.5, A, B, etc.' },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 8 },
+        { t: 'section', l: 'Proficiencies & Equipment' },
+        { k: 'asi', l: 'Ability Scores', t: 'text', cols: 6, ph: 'Strength, Dexterity, Intelligence' },
+        { k: 'feat', l: 'Origin Feat', t: 'text', cols: 6, ph: 'Name of the feat' },
+        { k: 'skills', l: 'Skill Proficiencies', t: 'text', cols: 6, ph: 'Insight, Religion' },
+        { k: 'tools', l: 'Tool Proficiencies', t: 'text', cols: 6, ph: "Calligrapher's supplies" },
+        { k: 'langs', l: 'Languages', t: 'text', cols: 6, ph: 'Two of your choice' },
+        { k: 'equip', l: 'Equipment', t: 'area', cols: 6, rows: 3 },
+        { t: 'section', l: 'Feature' },
+        { k: 'fname', l: 'Feature Name', t: 'text', cols: 12, ph: 'Shelter of the Faithful' },
+        { k: 'ftext', l: 'Feature Description', t: 'rich', rows: 6 }
+      ],
+      meta: d => S(d.skills) || 'Background',
+      gen: d => {
+        const o = ['### ' + (S(d.name) || 'Unnamed Background')];
+        if (S(d.desc)) o.push(S(d.desc));
+        const p = props([['Ability Scores', d.asi], ['Origin Feat', d.feat], ['Skill Proficiencies', d.skills], ['Tool Proficiencies', d.tools], ['Languages', d.langs], ['Equipment', d.equip]]);
+        if (p) o.push(p);
+        if (S(d.fname) || S(d.ftext)) { o.push('#### Feature: ' + (S(d.fname) || 'Unnamed Feature')); if (S(d.ftext)) o.push(S(d.ftext)); }
+        return o.join('\n\n');
+      }
+    },
+    feat: {
+      name: 'Feat', plural: 'Feats', color: '#2F855A',
+      blurb: 'Write a feat with its category, prerequisite and rules text.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Name the feat and write what it does.' },
+        { k: 'name', l: 'Name', t: 'text', req: 1, cols: 8 },
+        { k: 'version', l: 'Version', t: 'text', cols: 4, ph: '1, 1.5, A, B, etc.' },
+        { k: 'cat', l: 'Category', t: 'sel', cols: 4, opts: FEAT_CATS },
+        { k: 'prereq', l: 'Prerequisite', t: 'text', cols: 8, ph: 'Level 4+, Strength 13 or higher' },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 9 }
+      ],
+      meta: d => (S(d.cat) ? S(d.cat) + ' feat' : 'Feat'),
+      gen: d => {
+        const o = ['#### ' + (S(d.name) || 'Unnamed Feat')];
+        const line = (S(d.cat) ? S(d.cat) + ' Feat' : '') + (S(d.prereq) ? (S(d.cat) ? ' ' : '') + '(Prerequisite: ' + S(d.prereq) + ')' : '');
+        if (line) o.push('*' + line + '*');
+        if (S(d.desc)) o.push(S(d.desc));
+        return o.join('\n\n');
+      }
+    },
+    item: {
+      name: 'Magic Item', plural: 'Magic Items', color: '#7C4DDB',
+      blurb: 'Create a magic item with rarity, attunement and a full description.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Start by entering the details of your magic item.' },
+        { k: 'name', l: 'Item Name', t: 'text', req: 1, cols: 8, ph: 'Enter item name' },
+        { k: 'version', l: 'Version', t: 'text', cols: 4, ph: '1, 1.5, A, B, etc.' },
+        { k: 'itype', l: 'Item Type', t: 'sel', req: 1, cols: 4, opts: ITEM_TYPES },
+        { k: 'sub', l: 'Subtype', t: 'text', cols: 4, ph: 'any sword, medium armor, etc.' },
+        { k: 'rarity', l: 'Rarity', t: 'sel', req: 1, cols: 4, opts: RARITIES },
+        { k: 'attune', l: 'Requires Attunement?', t: 'check', cols: 4 },
+        { k: 'attuneReq', l: 'Attunement Requirement', t: 'text', cols: 8, ph: 'by a spellcaster', enable: d => d.attune },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 10 },
+        { t: 'section', l: 'Picture', help: 'Optional. Add a photo or artwork of your item. Pictures come from the Assets page, or upload one here.' },
+        { k: 'pic', l: 'Picture', t: 'asset', cols: 6 },
+        { k: 'picPos', l: 'Position', t: 'sel', cols: 3, opts: [['right', 'Right of text'], ['left', 'Left of text'], ['full', 'Full width']], def: 'right', nodash: 1 },
+        { k: 'picW', l: 'Width (px)', t: 'num', cols: 3, def: '160', min: 40, max: 700 }
+      ],
+      meta: d => [S(d.rarity), S(d.itype)].filter(Boolean).join(' ') || 'Magic item',
+      gen: d => {
+        const o = ['#### ' + (S(d.name) || 'Unnamed Item')];
+        const type = S(d.itype) === 'Wondrous Item' ? 'Wondrous item' : S(d.itype);
+        let line = type + (S(d.sub) ? ' (' + lower(d.sub) + ')' : '');
+        if (S(d.rarity)) line += (line ? ', ' : '') + lower(d.rarity);
+        if (d.attune) line += ' (requires attunement' + (S(d.attuneReq) ? ' ' + lower(d.attuneReq) : '') + ')';
+        if (line) o.push('*' + line + '*');
+        o.push(':');
+        if (S(d.pic)) {
+          const w = Math.max(40, Math.min(700, parseInt(d.picW, 10) || 160));
+          const css = d.picPos === 'full' ? 'width:100%' : 'width:' + w + 'px,float:' + (d.picPos === 'left' ? 'left,margin-right:8px' : 'right,margin-left:8px');
+          o.push('![' + S(d.name).replace(/[\[\]]/g, '') + '](asset:' + S(d.pic) + '){' + css + '}');
+        }
+        if (S(d.desc)) o.push(S(d.desc));
+        return o.join('\n');
+      }
+    },
+    monster: {
+      name: 'Monster', plural: 'Monsters', color: '#C0392B',
+      blurb: 'Build a stat block with abilities, actions and challenge rating.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Name, size and type go on the first line of the stat block.' },
+        { k: 'name', l: 'Monster Name', t: 'text', req: 1, cols: 6, ph: 'Enter monster name' },
+        { k: 'version', l: 'Version', t: 'text', cols: 2, ph: '1, A, B' },
+        { k: 'size', l: 'Size', t: 'sel', req: 1, cols: 2, opts: SIZES, def: 'Medium', nodash: 1 },
+        { k: 'mtype', l: 'Type', t: 'sel', req: 1, cols: 2, opts: MTYPES },
+        { k: 'tag', l: 'Subtype / Tag', t: 'text', cols: 4, ph: 'goblinoid, shapechanger' },
+        { k: 'align', l: 'Alignment', t: 'sel', cols: 4, opts: ALIGNS },
+        { k: 'cr', l: 'Challenge Rating', t: 'sel', req: 1, cols: 4, opts: CRS, def: '1', nodash: 1 },
+        { t: 'section', l: 'Defenses & Movement' },
+        { k: 'ac', l: 'Armor Class', t: 'num', req: 1, cols: 3, ph: '#' },
+        { k: 'acType', l: 'Armor Type', t: 'text', cols: 3, ph: 'natural armor' },
+        { k: 'hp', l: 'Hit Points (average)', t: 'num', req: 1, cols: 3, ph: '#' },
+        { k: 'hpf', l: 'HP Formula', t: 'text', cols: 3, ph: '5d8 + 15' },
+        { k: 'walk', l: 'Walk (ft.)', t: 'num', cols: 2, def: '30' },
+        { k: 'burrow', l: 'Burrow (ft.)', t: 'num', cols: 2 },
+        { k: 'climb', l: 'Climb (ft.)', t: 'num', cols: 2 },
+        { k: 'fly', l: 'Fly (ft.)', t: 'num', cols: 2 },
+        { k: 'hover', l: 'Hover', t: 'check', cols: 2, enable: d => S(d.fly) !== '' },
+        { k: 'swim', l: 'Swim (ft.)', t: 'num', cols: 2 },
+        { t: 'section', l: 'Ability Scores' }
+      ].concat(abilityFields, [
+        { t: 'section', l: 'Proficiencies & Senses' },
+        { k: 'saves', l: 'Saving Throws', t: 'text', cols: 6, ph: 'Dex +5, Wis +3' },
+        { k: 'skills', l: 'Skills', t: 'text', cols: 6, ph: 'Perception +3, Stealth +4' },
+        { k: 'vuln', l: 'Damage Vulnerabilities', t: 'text', cols: 6 },
+        { k: 'resist', l: 'Damage Resistances', t: 'text', cols: 6 },
+        { k: 'immune', l: 'Damage Immunities', t: 'text', cols: 6 },
+        { k: 'cond', l: 'Condition Immunities', t: 'text', cols: 6 },
+        { k: 'senses', l: 'Senses', t: 'text', cols: 6, ph: 'darkvision 60 ft., passive Perception 13' },
+        { k: 'langs', l: 'Languages', t: 'text', cols: 6, ph: 'Common, Goblin' },
+        { t: 'section', l: 'Traits & Actions', help: 'Write one entry per line in the form "Name. Text". The name becomes bold italic.' },
+        { k: 'traits', l: 'Special Traits', t: 'rich', rows: 5, ph: 'Pack Tactics. The wolf has advantage on attack rolls...' },
+        { k: 'actions', l: 'Actions', t: 'rich', rows: 6, ph: 'Bite. *Melee Weapon Attack:* +5 to hit, reach 5 ft., one target. *Hit:* 11 (2d6 + 4) piercing damage.' },
+        { k: 'bonus', l: 'Bonus Actions', t: 'rich', rows: 3 },
+        { k: 'react', l: 'Reactions', t: 'rich', rows: 3 },
+        { k: 'legend', l: 'Legendary Actions', t: 'rich', rows: 4 },
+        { k: 'desc', l: 'Description', t: 'rich', rows: 5, help: 'Appears below the stat block.' }
+      ]),
+      meta: d => 'CR ' + d.cr + ' ' + [S(d.size), lower(d.mtype)].filter(Boolean).join(' '),
+      gen: d => {
+        const o = ['{{monster,frame', '## ' + (S(d.name) || 'Unnamed Monster')];
+        const kind = [S(d.size), lower(d.mtype)].filter(Boolean).join(' ') + (S(d.tag) ? ' (' + S(d.tag) + ')' : '') + (S(d.align) ? ', ' + S(d.align) : '');
+        if (kind) o.push('*' + kind + '*');
+        o.push('___');
+        const def = (k, v) => S(v) ? '**' + k + '** :: ' + S(v) : null;
+        const sp = [];
+        if (S(d.walk) !== '') sp.push(S(d.walk) + ' ft.');
+        [['burrow', 'burrow'], ['climb', 'climb'], ['fly', 'fly'], ['swim', 'swim']].forEach(p => {
+          if (S(d[p[0]]) !== '') sp.push(p[1] + ' ' + S(d[p[0]]) + ' ft.' + (p[0] === 'fly' && d.hover ? ' (hover)' : ''));
+        });
+        const ac = S(d.ac) ? S(d.ac) + (S(d.acType) ? ' (' + S(d.acType) + ')' : '') : '';
+        const hp = S(d.hp) ? S(d.hp) + (S(d.hpf) ? ' (' + S(d.hpf) + ')' : '') : '';
+        o.push([def('Armor Class', ac), def('Hit Points', hp), def('Speed', sp.join(', ') || '0 ft.')].filter(Boolean).join('\n'));
+        o.push('___');
+        o.push('|STR|DEX|CON|INT|WIS|CHA|');
+        o.push('|:---:|:---:|:---:|:---:|:---:|:---:|');
+        o.push('|' + AB.map(a => { const v = S(d[a[0]]) === '' ? 10 : +d[a[0]]; return v + ' (' + mod(v) + ')'; }).join('|') + '|');
+        o.push('___');
+        const g = [def('Saving Throws', d.saves), def('Skills', d.skills), def('Damage Vulnerabilities', d.vuln), def('Damage Resistances', d.resist), def('Damage Immunities', d.immune), def('Condition Immunities', d.cond), def('Senses', d.senses), def('Languages', d.langs || '—'), '**Challenge** :: ' + d.cr + ' (' + XP[d.cr].toLocaleString('en-US') + ' XP)'].filter(Boolean);
+        o.push(g.join('\n'));
+        if (S(d.traits)) o.push('___', rules(d.traits));
+        const sec = (title, txt) => { if (S(txt)) o.push('', '### ' + title, rules(txt)); };
+        sec('Actions', d.actions); sec('Bonus Actions', d.bonus); sec('Reactions', d.react); sec('Legendary Actions', d.legend);
+        o.push('}}');
+        if (S(d.desc)) o.push('', S(d.desc));
+        return o.join('\n');
+      }
+    },
+    species: {
+      name: 'Species', plural: 'Species', color: '#0E8A8A',
+      blurb: 'Define a species with size, speed, languages and its own traits.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Start with a name and a description for your species.' },
+        { k: 'name', l: 'Name', t: 'text', req: 1, cols: 8 },
+        { k: 'version', l: 'Version', t: 'text', cols: 4, ph: '1, 1.5, A, B, etc.' },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 8 },
+        { t: 'section', l: 'Species Traits' },
+        { k: 'size', l: 'Size', t: 'sel', cols: 4, opts: ['Tiny', 'Small', 'Medium', 'Large', 'Small or Medium', 'Medium or Large'] },
+        { k: 'speed', l: 'Speed', t: 'text', cols: 4, ph: '30 feet' },
+        { k: 'langs', l: 'Languages', t: 'text', cols: 4, ph: 'Common and one other' },
+        { k: 'asi', l: 'Ability Score Increase', t: 'text', cols: 6, ph: 'Your Constitution score increases by 2.' },
+        { k: 'age', l: 'Age', t: 'area', cols: 6, rows: 2 },
+        { k: 'align', l: 'Alignment', t: 'area', cols: 12, rows: 2 },
+        { k: 'traits', l: 'Traits', t: 'repeater', itemLabel: 'Trait', addLabel: 'Add trait', sub: [
+          { k: 'name', l: 'Trait Name', t: 'text', cols: 12 },
+          { k: 'text', l: 'Description', t: 'rich', rows: 5 }
+        ] }
+      ],
+      meta: d => [S(d.size), S(d.speed)].filter(Boolean).join(', ') || 'Species',
+      gen: d => {
+        const o = ['### ' + (S(d.name) || 'Unnamed Species')];
+        if (S(d.desc)) o.push(S(d.desc));
+        [['Ability Score Increase', d.asi], ['Age', d.age], ['Alignment', d.align], ['Size', d.size], ['Speed', d.speed], ['Languages', d.langs]].forEach(p => { if (S(p[1])) o.push('***' + p[0] + '.*** ' + S(p[1])); });
+        (d.traits || []).forEach(t => { if (S(t.name) || S(t.text)) o.push('***' + (S(t.name) || 'Trait') + '.*** ' + S(t.text)); });
+        return o.join('\n\n');
+      }
+    },
+    spell: {
+      name: 'Spell', plural: 'Spells', color: '#6B4FD3',
+      blurb: 'Set casting time, range, components and duration, then write the effect.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Start by entering basic details for your homebrew spell below.' },
+        { k: 'name', l: 'Spell Name', t: 'text', req: 1, cols: 4, ph: 'Enter spell name' },
+        { k: 'version', l: 'Version', t: 'text', cols: 2, ph: '1, 1.5, A, B, etc.' },
+        { k: 'level', l: 'Spell Level', t: 'sel', req: 1, cols: 3, opts: SPELL_LEVELS, def: '0', nodash: 1 },
+        { k: 'school', l: 'Spell School', t: 'sel', req: 1, cols: 3, opts: SCHOOLS },
+        { k: 'ctNum', l: 'Casting Time', t: 'num', req: 1, cols: 2, ph: '#', def: '1', min: 1 },
+        { k: 'ctUnit', l: 'Casting time unit', t: 'sel', cols: 2, opts: CT, def: 'action', nodash: 1, lhide: 1 },
+        { k: 'ctReact', l: 'Reaction Casting Time Description', t: 'text', req: 1, cols: 8, ph: 'Enter the reaction condition description', enable: d => d.ctUnit === 'reaction' },
+        { k: 'comp', l: 'Components', t: 'toggles', cols: 3, opts: ['V', 'S', 'M'] },
+        { k: 'mat', l: 'Material Components Description', t: 'text', req: 1, cols: 9, ph: 'Enter the material components description', enable: d => (d.comp || []).includes('M') },
+        { k: 'rangeType', l: 'Spell Range Type', t: 'sel', req: 1, cols: 3, opts: RANGES, def: 'self', nodash: 1 },
+        { k: 'rangeDist', l: 'Range (ft.)', t: 'num', req: 1, cols: 2, ph: 'Enter distance', enable: d => d.rangeType === 'ranged' },
+        { k: 'durType', l: 'Duration Type', t: 'sel', req: 1, cols: 3, opts: DURS, def: 'instant', nodash: 1 },
+        { k: 'durNum', l: 'Duration', t: 'num', req: 1, cols: 2, ph: '#', min: 1, enable: d => d.durType === 'time' || d.durType === 'conc' },
+        { k: 'durUnit', l: 'Duration unit', t: 'sel', cols: 2, opts: DUNIT, def: 'minute', nodash: 1, lhide: 1, enable: d => d.durType === 'time' || d.durType === 'conc' },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 10 },
+        { k: 'ritual', l: 'Ritual Spell?', t: 'check', cols: 3 },
+        { k: 'hl', l: 'At Higher Levels Scaling?', t: 'check', cols: 3 },
+        { k: 'classes', l: 'Available for Class(es)', t: 'chips', req: 1, cols: 12, opts: CLASSES },
+        { k: 'hlText', l: 'At Higher Levels Text', t: 'rich', rows: 3, enable: d => d.hl, ph: 'When you cast this spell using a spell slot of 2nd level or higher...' }
+      ],
+      meta: d => (+d.level === 0 ? 'Cantrip' : ord(d.level) + ' level') + (S(d.school) ? ' ' + lower(d.school) : ''),
+      gen: d => {
+        const lvl = +d.level || 0, sc = lower(d.school);
+        let kind = lvl === 0 ? (sc ? cap(sc) + ' cantrip' : 'Cantrip') : ord(lvl) + '-level ' + (sc || 'spell');
+        if (d.ritual) kind += ' (ritual)';
+        const n = +d.ctNum || 1;
+        let ct;
+        if (d.ctUnit === 'reaction') ct = plural(n, 'reaction') + (S(d.ctReact) ? ', ' + S(d.ctReact) : '');
+        else if (d.ctUnit === 'no action') ct = 'No action';
+        else if (d.ctUnit === 'special') ct = 'Special';
+        else ct = plural(n, d.ctUnit || 'action');
+        const rng = d.rangeType === 'ranged' ? (S(d.rangeDist) ? S(d.rangeDist) + ' feet' : '—') : ({ self: 'Self', touch: 'Touch', sight: 'Sight', unlimited: 'Unlimited' }[d.rangeType] || '—');
+        const comps = (d.comp || []).map(c => c === 'M' && S(d.mat) ? 'M (' + S(d.mat) + ')' : c).join(', ') || '—';
+        const dn = +d.durNum || 1, dt = plural(dn, d.durUnit || 'minute');
+        const dur = { time: dt, conc: 'Concentration, up to ' + dt, disp: 'Until dispelled', trig: 'Until dispelled or triggered', special: 'Special' }[d.durType] || 'Instantaneous';
+        const o = ['#### ' + (S(d.name) || 'Unnamed Spell'), '*' + kind + '*', '', '**Casting Time:** :: ' + ct, '**Range:** :: ' + rng, '**Components:** :: ' + comps, '**Duration:** :: ' + dur, ''];
+        if (S(d.desc)) o.push(S(d.desc), '');
+        if (d.hl && S(d.hlText)) o.push('***At Higher Levels.*** ' + S(d.hlText), '');
+        if ((d.classes || []).length) o.push('***Spell Lists.*** ' + d.classes.join(', '));
+        return o.join('\n').replace(/\n+$/, '');
+      }
+    },
+    subclass: {
+      name: 'Subclass', plural: 'Subclasses', color: '#E07B10',
+      blurb: 'Pick a class and write a subclass with its features by level.',
+      fields: [
+        { t: 'section', l: 'Basic Information', help: 'Start by entering descriptive information for your homebrew subclass below.' },
+        { k: 'name', l: 'Name', t: 'text', req: 1, cols: 8, help: 'The name of your subclass.' },
+        { k: 'version', l: 'Version', t: 'text', cols: 4, ph: '1, 1.5, A, B, etc.' },
+        { k: 'cls', l: 'Class', t: 'sel', req: 1, cols: 4, opts: CLASSES },
+        { k: 'term', l: 'Subclass Label', t: 'text', cols: 8, ph: 'Martial Archetype, Divine Domain, ...', help: 'Used in the feature lines, for example "3rd-level Martial Archetype feature". Fills in automatically from the class.' },
+        { k: 'short', l: 'Short Description', t: 'rich', req: 1, rows: 4 },
+        { k: 'desc', l: 'Description', t: 'rich', req: 1, rows: 9 },
+        { t: 'section', l: 'Spellcasting', help: 'Only needed if the subclass grants spellcasting.' },
+        { k: 'sAbility', l: 'Spellcasting Ability', t: 'sel', cols: 4, opts: ['Intelligence', 'Wisdom', 'Charisma'] },
+        { k: 'canCast', l: 'Can Cast Spells', t: 'sel', cols: 4, opts: [['yes', 'Yes'], ['no', 'No']] },
+        { k: 'sList', l: 'Additional Spell List', t: 'text', cols: 4, ph: 'Wizard', enable: d => d.canCast === 'yes' },
+        { k: 'sPrep', l: 'Spell Prepare Type', t: 'sel', cols: 4, opts: [['prepared', 'Prepared spells'], ['known', 'Known spells']], enable: d => d.canCast === 'yes' },
+        { k: 'sSpecific', l: 'Additional Specific Spells', t: 'text', cols: 8, ph: 'Choose spells for expanded spell lists, domain spells, etc.', enable: d => d.canCast === 'yes' },
+        { t: 'section', l: 'Features', help: 'Add one entry for each feature the subclass grants.' },
+        { k: 'features', l: 'Features', t: 'repeater', itemLabel: 'Feature', addLabel: 'Add feature', sub: [
+          { k: 'level', l: 'Level', t: 'sel', cols: 3, opts: Array.from({ length: 20 }, (_, i) => String(i + 1)), def: '3', nodash: 1 },
+          { k: 'name', l: 'Feature Name', t: 'text', cols: 9 },
+          { k: 'text', l: 'Description', t: 'rich', rows: 6 }
+        ] }
+      ],
+      meta: d => [S(d.cls), S(d.term)].filter(Boolean).join(' · ') || 'Subclass',
+      gen: d => {
+        const o = ['### ' + (S(d.name) || 'Unnamed Subclass')];
+        if (S(d.short)) o.push('*' + S(d.short).replace(/\n+/g, ' ') + '*');
+        if (S(d.desc)) o.push(S(d.desc));
+        if (d.canCast === 'yes') {
+          const bits = [];
+          if (S(d.sAbility)) bits.push('Spellcasting ability: ' + S(d.sAbility) + '.');
+          if (S(d.sPrep)) bits.push('You ' + (d.sPrep === 'known' ? 'know' : 'prepare') + ' your spells.');
+          if (S(d.sList)) bits.push('Spell list: ' + S(d.sList) + '.');
+          if (S(d.sSpecific)) bits.push('Additional spells: ' + S(d.sSpecific) + '.');
+          if (bits.length) o.push('***Spellcasting.*** ' + bits.join(' '));
+        }
+        (d.features || []).map((f, i) => ({ f, i })).sort((a, b) => (+a.f.level || 0) - (+b.f.level || 0) || a.i - b.i).forEach(x => {
+          const f = x.f;
+          if (!S(f.name) && !S(f.text)) return;
+          o.push('#### ' + (S(f.name) || 'Unnamed Feature'));
+          if (+f.level) o.push('*' + ord(f.level) + '-level ' + (S(d.term) || 'subclass') + ' feature*');
+          if (S(f.text)) o.push(S(f.text));
+        });
+        return o.join('\n\n');
+      }
+    }
+  };
+  const ORDER = ['background', 'feat', 'item', 'monster', 'species', 'spell', 'subclass'];
+  Object.keys(TYPES).forEach(k => { TYPES[k].key = k; });
+
+  function defaults(T) {
+    const d = {};
+    T.fields.forEach(f => {
+      if (!f.k) return;
+      d[f.k] = f.def !== undefined ? f.def : (f.t === 'check' ? false : (f.t === 'toggles' || f.t === 'chips' || f.t === 'repeater') ? [] : '');
+    });
+    return d;
+  }
+
+  /* ---------- Speicher ---------- */
+  const KEY = 'homebrew-workshop-v2';
+  let store = [], storeOK = true, cur = null, pendingTemplate = null;
+  try {
+    const raw = localStorage.getItem(KEY), a = raw ? JSON.parse(raw) : [];
+    store = Array.isArray(a) ? a.filter(r => r && TYPES[r.type] && r.d && r.id) : [];
+  } catch (e) { store = []; storeOK = false; }
+  const writeStore = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { storeOK = false; } };
+
+  function persist() {
+    if (!cur) return;
+    if (!cur.id && !S(cur.d.name)) return;
+    if (!cur.id) cur.id = newId();
+    const rec = store.find(r => r.id === cur.id);
+    if (rec) { rec.d = clone(cur.d); rec.updated = Date.now(); }
+    else store.push({ id: cur.id, type: cur.type, d: clone(cur.d), updated: Date.now() });
+    writeStore();
+  }
+
+  /* ---------- UI-Bausteine ---------- */
+  const app = document.getElementById('app');
+
+  function arm(btn, label, fn) {
+    if (btn._t) { clearTimeout(btn._t); btn._t = null; btn.textContent = btn._o; btn.classList.remove('armed'); fn(); return; }
+    btn._o = btn.textContent; btn.textContent = label; btn.classList.add('armed');
+    btn._t = setTimeout(() => { btn.textContent = btn._o; btn.classList.remove('armed'); btn._t = null; }, 3000);
+  }
+
+  function copyText(text, statusEl) {
+    const say = m => { statusEl.textContent = m; clearTimeout(statusEl._t); statusEl._t = setTimeout(() => { statusEl.textContent = ''; }, 3000); };
+    if (!text) { say('Nothing to copy yet'); return; }
+    const fb = () => { const pre = statusEl._pre; if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } say('Selected. Press Ctrl+C / Cmd+C'); };
+    try { navigator.clipboard.writeText(text).then(() => say('Copied'), fb); } catch (e) { fb(); }
+  }
+
+  /* ---------- Seiten-Vorschau (Homebrewery-Renderer + 5e-PHB-Theme) ---------- */
+  const fontStyle = document.createElement('style');
+  fontStyle.textContent = HB_FONTS;
+  document.head.append(fontStyle);
+
+  const escH = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const PAPER = { a4: { w: 210, h: 297 }, letter: { w: 215.9, h: 279.4 } };
+  let paper = 'a4';
+  try { const pv = localStorage.getItem('hbw-paper'); if (PAPER[pv]) paper = pv; } catch (e) { /* Standard A4 */ }
+  const pagePx = () => PAPER[paper].w * 96 / 25.4;
+  const paperCss = () => '.pages > .page { width: ' + PAPER[paper].w + 'mm !important; height: ' + PAPER[paper].h + 'mm !important; }';
+  const PV_CSS = `
+    :host { all: initial; display: block; color: #000; }
+    .pages { --HB_Color_Background: #EFE7D1; }
+    .pages { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    .pages > .page { flex: 0 0 auto; margin: 0; box-shadow: 1px 4px 14px rgba(0,0,0,.65); width: var(--pw, 210mm) !important; height: var(--ph, 297mm) !important; }
+    .hbempty { color: #C9D3E3; font: 14px/1.5 system-ui, sans-serif; padding: 48px 16px; text-align: center; zoom: 1; }
+  `;
+  const EXPORT_CSS = `
+    html { background: #2C3C52; }
+    body { margin: 0; color: #000; font: 14px system-ui, sans-serif; }
+    .noprint { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: center; padding: 10px 16px; background: #1F272D; color: #E9EDF0; }
+    .noprint button { font: 700 13px system-ui, sans-serif; padding: 9px 14px; border: 0; border-radius: 2px; background: #3FC4F4; color: #06151D; cursor: pointer; }
+    .pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 18px 0 40px; }
+    .pages > .page { flex: 0 0 auto; box-shadow: 1px 4px 14px rgba(0,0,0,.65); content-visibility: visible; }
+    @page { margin: 0; }
+    @media print {
+      html { background: none; }
+      .noprint { display: none; }
+      .pages { display: block; padding: 0; gap: 0; }
+      .pages > .page { margin: 0; box-shadow: none; break-after: page; page-break-after: always; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  `;
+
+  /* ---------- Eigene Bilder (Assets) und Seitenhintergrund ---------- */
+  const ASSETS = [];
+  let idbOK = true;
+  const idbOpen = () => new Promise((res, rej) => {
+    try { const r = indexedDB.open('hbw-assets', 1); r.onupgradeneeded = () => r.result.createObjectStore('a', { keyPath: 'id' }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); }
+  });
+  const idbDo = (mode, fn) => idbOpen().then(db => new Promise((res, rej) => {
+    const t = db.transaction('a', mode); const rq = fn(t.objectStore('a'));
+    t.oncomplete = () => { res(rq && rq.result); db.close(); }; t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  }));
+  const assetListeners = new Set();
+  const DYN = new Set();
+  const BG = { mode: 'default', color: '#EFE7D1', asset: '', fit: 'cover' };
+  try { const o = JSON.parse(localStorage.getItem('hbw-bg') || '{}'); if (o && typeof o === 'object') ['mode', 'color', 'asset', 'fit'].forEach(k => { if (typeof o[k] === 'string') BG[k] = o[k]; }); } catch (e) { /* Standard */ }
+  const bgCss = () => {
+    if (BG.mode === 'color' && /^#[0-9a-f]{6}$/i.test(BG.color)) return '.pages > .page { background: ' + BG.color + ' !important; }';
+    if (BG.mode === 'image') {
+      const a = ASSETS.find(x => x.id === BG.asset);
+      if (a) return '.pages > .page { background: url("' + a.url + '") center / ' + (BG.fit === 'tile' ? 'auto repeat' : BG.fit === 'stretch' ? '100% 100% no-repeat' : 'cover no-repeat') + ' !important; }';
+    }
+    return '';
+  };
+  const applyBg = () => { const css = bgCss(); DYN.forEach(el => { if (el.isConnected) el.textContent = css; else DYN.delete(el); }); };
+  const saveBg = () => { try { localStorage.setItem('hbw-bg', JSON.stringify(BG)); } catch (e) { /* ohne Speicher */ } applyBg(); };
+  const assetsChanged = () => { applyBg(); assetListeners.forEach(f => f()); };
+  const onAssets = (el, fn) => {
+    const f = () => { if (!el.isConnected) { if (el._was) { assetListeners.delete(f); return; } } else el._was = true; fn(); };
+    assetListeners.add(f);
+  };
+  const resolveAssets = t => t.replace(/asset:([a-z0-9-]+)/g, (m, n) => { const a = ASSETS.find(x => x.name === n); return a ? a.url : m; });
+  idbDo('readonly', st => st.getAll()).then(list => { (list || []).sort((a, b) => a.t - b.t).forEach(a => { if (a && a.id && a.name && /^data:image\//.test(a.url)) ASSETS.push(a); }); assetsChanged(); }, () => { idbOK = false; });
+
+  const slug = n => n.toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'image';
+  async function addFiles(files) {
+    const added = []; let bad = 0;
+    for (const f of files) {
+      if (!/^image\/(png|jpeg|webp|gif)$/.test(f.type) || f.size > 20 * 1024 * 1024) { bad++; continue; }
+      try {
+        const bmp = await createImageBitmap(f);
+        const k = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
+        const w = Math.max(1, Math.round(bmp.width * k)), hh = Math.max(1, Math.round(bmp.height * k));
+        const c = document.createElement('canvas'); c.width = w; c.height = hh;
+        c.getContext('2d').drawImage(bmp, 0, 0, w, hh);
+        if (bmp.close) bmp.close();
+        let url = c.toDataURL('image/png');
+        if (f.type === 'image/jpeg' || url.length > 2500000) {
+          const t = document.createElement('canvas'); t.width = 32; t.height = 32;
+          const tc = t.getContext('2d'); tc.drawImage(c, 0, 0, 32, 32);
+          const px = tc.getImageData(0, 0, 32, 32).data; let alpha = false;
+          for (let i = 3; i < px.length; i += 4) if (px[i] < 250) { alpha = true; break; }
+          if (!alpha) {
+            const j = document.createElement('canvas'); j.width = w; j.height = hh;
+            const jc = j.getContext('2d'); jc.fillStyle = '#fff'; jc.fillRect(0, 0, w, hh); jc.drawImage(c, 0, 0);
+            url = j.toDataURL('image/jpeg', 0.88);
+          }
+        }
+        const base = slug(f.name); let name = base, n = 2;
+        while (ASSETS.some(a => a.name === name)) name = base + '-' + (n++);
+        const rec = { id: newId(), name, url, w, h: hh, t: Date.now() };
+        ASSETS.push(rec); added.push(rec);
+        try { await idbDo('readwrite', st => st.put(rec)); } catch (e) { idbOK = false; }
+      } catch (e) { bad++; }
+    }
+    assetsChanged();
+    return { added, msg: added.length + ' added' + (bad ? ', ' + bad + ' skipped (PNG, JPG, WebP or GIF up to 20 MB)' : '') + (idbOK ? '' : '. Storage is blocked, so images last only until you close this page') };
+  }
+  async function removeAsset(a) {
+    const i = ASSETS.indexOf(a); if (i >= 0) ASSETS.splice(i, 1);
+    try { await idbDo('readwrite', st => st.delete(a.id)); } catch (e) { /* ignorieren */ }
+    assetsChanged();
+  }
+  function uploader(cb) {
+    const inp = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', multiple: '', hidden: '', 'aria-label': 'Choose images' });
+    inp.addEventListener('change', async () => { const r = await addFiles(Array.from(inp.files || [])); inp.value = ''; cb(r); });
+    return [h('button', { class: 'btn sm', type: 'button', text: 'Upload images', onclick: () => inp.click() }), inp];
+  }
+  function assetPicker(onPick) {
+    const box = h('div', { class: 'ap' });
+    const msg = h('span', { class: 'apm', role: 'status' });
+    const draw = () => {
+      box.replaceChildren(
+        h('div', { class: 'aph' }, uploader(r => { msg.textContent = r.msg; }), msg),
+        ASSETS.length
+          ? h('div', { class: 'apg' }, ASSETS.map(a => h('button', { type: 'button', class: 'apt', title: 'Insert ' + a.name, onclick: () => onPick(a) }, h('img', { src: a.url, alt: '' }), h('span', { text: a.name }))))
+          : h('div', { class: 'apm', text: 'No images yet. Upload a picture, then click it to insert.' }));
+    };
+    draw(); onAssets(box, draw);
+    return box;
+  }
+  function bgControls() {
+    const box = h('div', { class: 'bgc' });
+    const msg = h('span', { class: 'apm', role: 'status' });
+    const draw = () => {
+      const mode = h('select', { 'aria-label': 'Page background', onchange: e => { BG.mode = e.target.value; saveBg(); draw(); } },
+        [['default', 'Default parchment'], ['color', 'Solid color'], ['image', 'Image']].map(o => h('option', { value: o[0], text: o[1] })));
+      mode.value = BG.mode;
+      const row = [h('label', { class: 'bgl' }, 'Background', mode)];
+      if (BG.mode === 'color') row.push(h('label', { class: 'bgl' }, 'Color', h('input', { type: 'color', value: /^#[0-9a-f]{6}$/i.test(BG.color) ? BG.color : '#EFE7D1', oninput: e => { BG.color = e.target.value; saveBg(); } })));
+      if (BG.mode === 'image') {
+        const sel = h('select', { 'aria-label': 'Background image', onchange: e => { BG.asset = e.target.value; saveBg(); } },
+          h('option', { value: '', text: ASSETS.length ? 'Choose an image' : 'No images yet' }), ASSETS.map(a => h('option', { value: a.id, text: a.name })));
+        sel.value = ASSETS.some(a => a.id === BG.asset) ? BG.asset : '';
+        const fit = h('select', { 'aria-label': 'Image fit', onchange: e => { BG.fit = e.target.value; saveBg(); } },
+          [['cover', 'Cover'], ['stretch', 'Stretch'], ['tile', 'Tile']].map(o => h('option', { value: o[0], text: o[1] })));
+        fit.value = BG.fit;
+        row.push(h('label', { class: 'bgl' }, 'Image', sel), h('label', { class: 'bgl' }, 'Fit', fit),
+          uploader(r => { if (r.added.length) { BG.asset = r.added[0].id; saveBg(); draw(); } msg.textContent = r.msg; }));
+      }
+      box.replaceChildren(...row.flat(), msg);
+    };
+    draw(); onAssets(box, draw);
+    return box;
+  }
+
+  const HBR = (() => {
+    const PB = /^(?=\\page(?:break)?(?: *{[^\n{}]*})?$)/m;
+    function clean(html) {
+      const t = document.createElement('template');
+      t.innerHTML = html;
+      t.content.querySelectorAll('script,iframe,object,embed,link,meta,base,form').forEach(n => n.remove());
+      t.content.querySelectorAll('*').forEach(el => {
+        Array.from(el.attributes).forEach(a => {
+          if (/^on/i.test(a.name) || (/^(href|src|xlink:href|action|formaction)$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) el.removeAttribute(a.name);
+        });
+      });
+      return t.innerHTML;
+    }
+    function pages(text) {
+      return resolveAssets(String(text)).split(PB).map((pt, i) => {
+        const el = document.createElement('div');
+        el.className = 'page'; el.id = 'p' + (i + 1);
+        if (pt.startsWith('\\page')) {
+          let tags = null;
+          try { tags = HBFM.firstLineTags(pt.split('\n', 1)[0]); } catch (e) { tags = null; }
+          if (tags) {
+            if (tags.classes) el.className += ' ' + tags.classes;
+            if (tags.styles) Object.keys(tags.styles).forEach(k => { try { el.style.setProperty(k, tags.styles[k]); } catch (e) { /* ignorieren */ } });
+            if (tags.attributes) Object.keys(tags.attributes).forEach(k => { try { if (!/^on/i.test(k)) el.setAttribute(k, tags.attributes[k]); } catch (e) { /* ignorieren */ } });
+          }
+          pt = pt.includes('\n') ? pt.slice(pt.indexOf('\n') + 1) : '';
+        }
+        pt += '\n\n&nbsp;\n\\column\n&nbsp;';
+        let html = '';
+        try { html = HBFM.render(pt, i); } catch (e) { html = '<p>Render error: ' + escH(e.message) + '</p>'; }
+        el.innerHTML = '<div class="columnWrapper">' + clean(html) + '</div>';
+        return el;
+      });
+    }
+    const absUrls = css => css.replace(/url\('assets\//g, () => "url('" + new URL('assets/', document.baseURI).href);
+    const count = text => (S(text) ? String(text).split(PB).length : 0);
+    function exportDoc(text, title) {
+      const body = pages(text).map(p => p.outerHTML).join('\n');
+      return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escH(title || 'Homebrew') + '</title><style>' +
+        absUrls(HB_FONTS) + '\n' + absUrls(HB_THEME).replace(/:host\b/g, ':root') + '\n.pages { counter-reset: page-numbers 0; }\n' + paperCss() + '\n' + bgCss() + '\n@page { size: ' + PAPER[paper].w + 'mm ' + PAPER[paper].h + 'mm; }\n' + EXPORT_CSS +
+        '</style></head><body><div class="noprint"><span>To make a PDF: press Print, choose "Save as PDF", turn off headers and footers, set margins to None.</span><button type="button" onclick="window.print()">Print / Save as PDF</button></div><div class="pages">' + body + '</div></body></html>';
+    }
+    return { pages, count, exportDoc };
+  })();
+
+  function printDoc(html) {
+    const f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    f.setAttribute('aria-hidden', 'true');
+    f.onload = () => {
+      const go = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { /* ignorieren */ } setTimeout(() => f.remove(), 120000); };
+      try { f.contentDocument.fonts.ready.then(() => setTimeout(go, 250), () => setTimeout(go, 600)); } catch (e) { setTimeout(go, 600); }
+    };
+    f.srcdoc = html;
+    document.body.append(f);
+  }
+
+  let DL = null;
+  const refreshExport = () => document.querySelectorAll('.btn-export').forEach(b => { b.hidden = !DL; });
+  try {
+    if (window.claude && window.claude.use) window.claude.use('downloads').then(d => { DL = d || null; refreshExport(); }, () => {});
+  } catch (e) { DL = null; }
+
+  let outTab = 'preview';
+  function outPanel(title, emptyText) {
+    let text = '', name = '', mode = 'fit', scale = 1, full = false, timer = null, dirty = true;
+    const pre = h('pre', { id: 'out', 'data-empty': emptyText });
+    const meta = h('span', { class: 'meta' });
+    const st = h('span', { class: 'cstatus', role: 'status' });
+    st._pre = pre;
+    const host = h('div', { class: 'pv-host' });
+    const shadow = host.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<style>' + HB_THEME + PV_CSS + '</style><div class="brewRenderer"><div class="pages"></div></div>';
+    const dyn = document.createElement('style'); dyn.textContent = bgCss(); shadow.append(dyn); DYN.add(dyn);
+    const pagesEl = shadow.querySelector('.pages');
+    const pv = h('div', { class: 'pv', tabindex: '0', 'aria-label': 'Page preview' }, host);
+
+    const say = m => { st.textContent = m; clearTimeout(st._t); st._t = setTimeout(() => { st.textContent = ''; }, 4000); };
+    const zl = h('span', { class: 'zl', text: '100%' });
+    const fitW = () => pv.clientWidth - 24;
+    const apply = () => {
+      if (!pv.clientWidth) return;
+      pagesEl.style.setProperty('--pw', PAPER[paper].w + 'mm');
+      pagesEl.style.setProperty('--ph', PAPER[paper].h + 'mm');
+      const s = mode === 'fit' ? Math.max(0.2, Math.min(fitW() / pagePx(), full ? 1.6 : 1.2)) : scale;
+      pagesEl.style.zoom = s;
+      zl.textContent = Math.round(s * 100) + '%';
+      scale = s;
+    };
+    const renderPv = () => {
+      dirty = false;
+      pagesEl.replaceChildren();
+      if (!S(text)) { const e = document.createElement('div'); e.className = 'hbempty'; e.textContent = emptyText; pagesEl.append(e); }
+      else HBR.pages(text).forEach(p => pagesEl.append(p));
+      apply();
+    };
+    const schedule = () => { clearTimeout(timer); timer = setTimeout(() => { if (outTab === 'preview') renderPv(); }, 150); };
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { if (mode === 'fit') apply(); }).observe(pv);
+
+    const tPrev = h('button', { type: 'button', role: 'tab', class: 'otab', text: 'Preview' });
+    const tCode = h('button', { type: 'button', role: 'tab', class: 'otab', text: 'Code' });
+    const zoomOut = h('button', { type: 'button', class: 'zb', title: 'Zoom out', 'aria-label': 'Zoom out', text: '−', onclick: () => { mode = 'manual'; scale = Math.max(0.2, scale / 1.15); apply(); } });
+    const zoomIn = h('button', { type: 'button', class: 'zb', title: 'Zoom in', 'aria-label': 'Zoom in', text: '+', onclick: () => { mode = 'manual'; scale = Math.min(2.5, scale * 1.15); apply(); } });
+    const zoomFit = h('button', { type: 'button', class: 'zb', title: 'Fit page to width', text: 'Fit', onclick: () => { mode = 'fit'; apply(); } });
+    const expand = h('button', { type: 'button', class: 'zb', title: 'Full screen', text: 'Expand' });
+    const swThumb = h('span', { class: 'psw-thumb', 'aria-hidden': 'true' });
+    const swA4 = h('button', { type: 'button', role: 'radio', class: 'psw-b', text: 'A4' });
+    const swLt = h('button', { type: 'button', role: 'radio', class: 'psw-b', text: 'Letter' });
+    const paperSw = h('div', { class: 'psw', role: 'radiogroup', 'aria-label': 'Paper size' }, swThumb, swA4, swLt);
+    const syncSw = () => {
+      swA4.setAttribute('aria-checked', paper === 'a4' ? 'true' : 'false');
+      swLt.setAttribute('aria-checked', paper === 'letter' ? 'true' : 'false');
+      paperSw.dataset.v = paper;
+    };
+    const setPaper = v => { paper = v; try { localStorage.setItem('hbw-paper', v); } catch (e) { /* ohne Speicher */ } syncSw(); apply(); };
+    swA4.addEventListener('click', () => setPaper('a4'));
+    swLt.addEventListener('click', () => setPaper('letter'));
+    syncSw();
+    const bgPanel = h('div', { class: 'bgp', hidden: '' }, bgControls());
+    const bgBtn = h('button', { type: 'button', class: 'zb', title: 'Page background', text: 'Background', onclick: () => { bgPanel.hidden = !bgPanel.hidden; } });
+    const tools = h('div', { class: 'otools' }, paperSw, zoomOut, zl, zoomIn, zoomFit, bgBtn, expand);
+    const setTab = t => {
+      outTab = t;
+      tPrev.setAttribute('aria-selected', t === 'preview' ? 'true' : 'false');
+      tCode.setAttribute('aria-selected', t === 'code' ? 'true' : 'false');
+      pv.hidden = t !== 'preview'; pre.hidden = t !== 'code'; tools.hidden = t !== 'preview'; if (t !== 'preview') bgPanel.hidden = true;
+      if (t === 'preview') { if (dirty) renderPv(); else apply(); }
+    };
+    tPrev.addEventListener('click', () => setTab('preview'));
+    tCode.addEventListener('click', () => setTab('code'));
+
+    const copy = h('button', { class: 'btn sm', type: 'button', text: 'Copy code', onclick: () => copyText(pre.textContent, st) });
+    const exp = h('button', { class: 'btn sm btn-export', type: 'button', text: STANDALONE ? 'Save as PDF' : 'Export for PDF', hidden: !DL && !STANDALONE, title: STANDALONE ? 'Opens the print dialog: choose Save as PDF' : 'Download a print-ready page you can save as PDF' });
+    exp.addEventListener('click', async () => {
+      if (!S(text)) { say('Nothing to export yet'); return; }
+      if (STANDALONE) { printDoc(HBR.exportDoc(text, name)); say('Choose "Save as PDF" in the print dialog.'); return; }
+      if (!DL) { say('Export is not available here'); return; }
+      try {
+        await DL.save({ filename: (S(name).replace(/[^\w\- ]+/g, '').replace(/\s+/g, '-').toLowerCase() || 'homebrew') + '.html', data: HBR.exportDoc(text, name) });
+        say('Saved. Open the file, then Print and Save as PDF.');
+      } catch (e) { if (!e || e.code !== 'declined') say('Export did not work here'); }
+    });
+
+    const imgHint = h('div', { class: 'hintimg', hidden: '', text: 'Your code uses uploaded images as asset:name. Homebrewery cannot see them: upload each image there (or to an image host) and replace asset:name with its link.' });
+    const el = h('aside', { class: 'out-panel', 'aria-label': title },
+      h('div', { class: 'out-head' }, h('div', null, h('h2', { text: title }), meta), h('div', { class: 'out-act' }, st, exp, copy)),
+      h('div', { class: 'otabs', role: 'tablist' }, tPrev, tCode, tools),
+      bgPanel,
+      pv, pre,
+      h('div', { class: 'out-foot' }, imgHint, (STANDALONE ? 'PDF: click Save as PDF and choose "Save as PDF" as the printer. Or open ' : 'PDF: use Export, open the file and choose Print, then Save as PDF. Or open '), h('a', { href: 'https://homebrewery.naturalcrit.com/new', target: '_blank', rel: 'noopener', text: 'Homebrewery' }), ' and paste the code.'));
+
+    const setFull = f => {
+      full = f; el.classList.toggle('full', f); expand.textContent = f ? 'Close' : 'Expand';
+      document.documentElement.style.overflow = f ? 'hidden' : '';
+      requestAnimationFrame(apply);
+    };
+    expand.addEventListener('click', () => setFull(!full));
+    el.addEventListener('keydown', e => { if (e.key === 'Escape' && full) setFull(false); });
+    window.addEventListener('hashchange', () => setFull(false), { once: true });
+    setTab(outTab);
+    return {
+      el, pre,
+      set(t, m, n) {
+        text = t; name = n || '';
+        pre.textContent = t;
+        imgHint.hidden = !/asset:[a-z0-9-]+/.test(t);
+        const k = HBR.count(t);
+        meta.textContent = m + (k ? ' · ' + k + (k === 1 ? ' page' : ' pages') : '');
+        dirty = true;
+        if (outTab === 'preview') schedule();
+      }
+    };
+  }
+
+  function topbar(active) {
+    const link = (label, href, key) => h('a', { href, class: active === key ? 'on' : '', 'aria-current': active === key ? 'page' : null, text: label });
+    return h('header', { class: 'bar' }, h('div', { class: 'in barin' },
+      h('a', { class: 'brand', href: '#home', text: 'Homebrewery Workshop' }),
+      h('nav', { class: 'nav', 'aria-label': 'Main' },
+        link('Home', '#home', 'home'),
+        link('My Creations (' + store.length + ')', '#creations', 'creations'),
+        link('Assets', '#assets', 'assets'),
+        h('a', { href: 'https://homebrewery.naturalcrit.com/new', target: '_blank', rel: 'noopener', text: 'Open Homebrewery' }))));
+  }
+  function shell(active, ...content) {
+    app.replaceChildren(topbar(active), h('main', { class: 'in main' }, content),
+      h('footer', { class: 'in about' }, 'Unofficial fan tool, vibe-coded with Claude (Anthropic). Not affiliated with or endorsed by Wizards of the Coast, D&D Beyond or Homebrewery. Dungeons & Dragons is a trademark of Wizards of the Coast LLC.'));
+    window.scrollTo(0, 0);
+  }
+  function crumbs(items) {
+    return h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, items.map(i => i[1] ? h('a', { href: i[1], text: i[0] }) : h('span', { class: 'cur', text: i[0] })));
+  }
+
+  /* ---------- Startseite ---------- */
+  function home() {
+    const cards = ORDER.map(k => {
+      const T = TYPES[k], n = store.filter(r => r.type === k).length;
+      return h('section', { class: 'card', style: '--acc:' + T.color },
+        h('h2', { text: T.plural }),
+        h('p', { text: T.blurb }),
+        h('div', { class: 'cbtns' },
+          h('a', { class: 'btn', href: '#creations-' + k, text: 'View my ' + T.plural.toLowerCase() + (n ? ' (' + n + ')' : '') }),
+          h('a', { class: 'btn', href: '#new-' + k, text: 'Create ' + T.name.toLowerCase() })));
+    });
+    shell('home', h('p', { class: 'lead', text: 'Choose what you want to create. Each editor mirrors the homebrew workflow and gives you finished Homebrewery code to paste into your book.' }), h('div', { class: 'cards' }, cards));
+  }
+
+  /* ---------- Assets und Hintergrund ---------- */
+  function assetsPage() {
+    const msg = h('div', { class: 'apm', role: 'status' });
+    const drop = h('div', { class: 'adrop' },
+      h('strong', { text: 'Drop images here or choose files' }),
+      h('div', null, uploader(r => { msg.textContent = r.msg; })),
+      h('div', { class: 'apm', text: 'PNG, JPG, WebP or GIF, up to 20 MB each. Images stay in this browser only. Upload only pictures you have the right to use.' }), msg);
+    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', async e => { e.preventDefault(); drop.classList.remove('over'); const r = await addFiles(Array.from(e.dataTransfer.files || [])); msg.textContent = r.msg; });
+    const grid = h('div', { class: 'agrid' });
+    const tile = a => {
+      const del = h('button', { class: 'btn line sm', type: 'button', text: 'Delete' });
+      del.addEventListener('click', () => arm(del, 'Sure?', () => removeAsset(a)));
+      const tag = '![' + a.name + '](asset:' + a.name + '){width:240px}';
+      return h('div', { class: 'atile' }, h('img', { src: a.url, alt: a.name }),
+        h('div', { class: 'am' }, h('div', { class: 'an', text: a.name }), h('div', { class: 'apm', text: a.w + ' × ' + a.h + ' px' }),
+          h('div', { class: 'ab' },
+            h('button', { class: 'btn sm', type: 'button', text: 'Use as background', onclick: () => { BG.mode = 'image'; BG.asset = a.id; saveBg(); msg.textContent = '"' + a.name + '" is now the page background.'; } }),
+            h('button', { class: 'btn line sm', type: 'button', text: 'Copy tag', onclick: () => { try { navigator.clipboard.writeText(tag).then(() => { msg.textContent = 'Copied ' + tag; }, () => { msg.textContent = 'Copy blocked here: ' + tag; }); } catch (e) { msg.textContent = tag; } } }),
+            del)));
+    };
+    const draw = () => { grid.replaceChildren(...(ASSETS.length ? ASSETS.map(tile) : [h('div', { class: 'apm', text: 'No images yet.' })])); };
+    draw(); onAssets(grid, draw);
+    shell('assets',
+      h('div', { class: 'top' }, crumbs([['Home', '#home'], ['Assets']])),
+      h('h1', { class: 'ptitle', text: 'Assets' }),
+      h('p', { class: 'lead', text: 'Upload your own pictures. Insert them in any text editor with the Image button, or use one as the page background. The background shows in the preview and in the PDF.' }),
+      h('h2', { class: 'asub', text: 'Page background' }), bgControls(),
+      h('h2', { class: 'asub', text: 'Images' }), drop, grid);
+  }
+
+  /* ---------- Subclass: Klasse und Vorlage wählen ---------- */
+  function subclassPicker() {
+    const clsSel = h('select', { id: 'pk-class' }, h('option', { value: '', text: '—' }), CLASSES.map(c => h('option', { value: c, text: c })));
+    const tplSel = h('select', { id: 'pk-tpl' }, h('option', { value: '', text: '—' }), store.filter(r => r.type === 'subclass').map(r => h('option', { value: r.id, text: (S(r.d.name) || 'Unnamed') + (S(r.d.cls) ? ' (' + r.d.cls + ')' : '') })));
+    const scratch = h('button', { class: 'btn', type: 'button', disabled: true, text: 'Create from scratch', onclick: () => { location.hash = '#new-subclass-' + lower(clsSel.value); } });
+    const create = h('button', { class: 'btn', type: 'button', disabled: true, text: 'Create', onclick: () => {
+      const rec = store.find(r => r.id === tplSel.value); if (!rec) return;
+      pendingTemplate = Object.assign(clone(rec.d), { name: S(rec.d.name) + ' (copy)' });
+      location.hash = '#new-subclass-' + (lower(rec.d.cls) || 'fighter');
+    } });
+    clsSel.addEventListener('change', () => { scratch.disabled = !clsSel.value; });
+    tplSel.addEventListener('change', () => { create.disabled = !tplSel.value; });
+    const T = TYPES.subclass;
+    shell('home',
+      h('div', { class: 'top' }, crumbs([['Home', '#home'], ['Creations', '#creations'], ['Create Subclass']]), h('div', { class: 'topbtns' }, h('a', { class: 'btn dark', href: '#creations', text: 'My Creations' }), h('a', { class: 'btn dark', href: '#creations-subclass', text: 'View my subclasses' }))),
+      h('div', { class: 'picker', style: '--acc:' + T.color },
+        h('h1', { text: 'Create Homebrew Subclass' }),
+        h('label', { for: 'pk-class', text: 'Select a class to create a new Subclass for:' }), clsSel,
+        scratch,
+        h('div', { class: 'or', text: 'OR' }),
+        h('label', { for: 'pk-tpl', style: 'margin-top:24px', text: 'Select one of your subclasses as a template:' }), tplSel,
+        create));
+  }
+
+  /* ---------- Formularfelder ---------- */
+  function emit(ta) { ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus(); }
+  function insertText(ta, text) { ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, 'end'); emit(ta); }
+  function wrapSel(ta, a, b, ph) {
+    const s = ta.selectionStart, e = ta.selectionEnd, sel = ta.value.slice(s, e) || ph;
+    ta.setRangeText(a + sel + b, s, e, 'end');
+    ta.setSelectionRange(s + a.length, s + a.length + sel.length); emit(ta);
+  }
+  function eachLine(ta, fn) {
+    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    const ls = v.lastIndexOf('\n', s - 1) + 1; let le = v.indexOf('\n', e); if (le < 0) le = v.length;
+    ta.setRangeText(v.slice(ls, le).split('\n').map(fn).join('\n'), ls, le, 'select'); emit(ta);
+  }
+
+  function buildRich(id, d, f, onChange) {
+    const ta = h('textarea', { id, rows: f.rows || 8, placeholder: f.ph || '', value: d[f.k], oninput: e => { d[f.k] = e.target.value; onChange(); } });
+    const btn = (label, title, fn) => h('button', { type: 'button', title, 'aria-label': title, text: label, onclick: fn });
+    const heading = h('select', { 'aria-label': 'Paragraph style', onchange: e => {
+      const lv = e.target.value; e.target.value = '';
+      if (lv === '') return;
+      eachLine(ta, l => (lv === 'p' ? '' : '#'.repeat(+lv) + ' ') + l.replace(/^#{1,6}\s+/, ''));
+    } }, h('option', { value: '', text: 'Paragraph' }), h('option', { value: 'p', text: 'Plain text' }), h('option', { value: '3', text: 'Heading 3' }), h('option', { value: '4', text: 'Heading 4' }), h('option', { value: '5', text: 'Heading 5' }));
+    heading.value = '';
+    const tb = h('div', { class: 'tb', role: 'toolbar', 'aria-label': 'Formatting' },
+      btn('B', 'Bold', () => wrapSel(ta, '**', '**', 'bold text')),
+      btn('I', 'Italic', () => wrapSel(ta, '*', '*', 'italic text')),
+      btn('S', 'Strikethrough', () => wrapSel(ta, '~~', '~~', 'text')),
+      h('span', { class: 'sep' }), heading, h('span', { class: 'sep' }),
+      btn('“ ”', 'Quote', () => eachLine(ta, l => (/^>\s/.test(l) ? l.slice(2) : '> ' + l))),
+      btn('• List', 'Bulleted list', () => eachLine(ta, l => (/^-\s/.test(l) ? l.slice(2) : '- ' + l))),
+      btn('1. List', 'Numbered list', (() => { let i = 0; return () => { i = 0; eachLine(ta, l => (/^\d+\.\s/.test(l) ? l.replace(/^\d+\.\s/, '') : (++i) + '. ' + l)); }; })()),
+      btn('—', 'Horizontal rule', () => insertText(ta, '\n\n---\n\n')),
+      btn('Table', 'Insert table', () => insertText(ta, '\n\n| Header | Header |\n|:--|:--|\n| Cell | Cell |\n| Cell | Cell |\n\n')),
+      h('span', { class: 'sep' }),
+      btn('Note', 'Insert note box', () => insertText(ta, '\n\n{{note\n##### Title\nText\n}}\n\n')),
+      btn('Read aloud', 'Insert read-aloud box', () => insertText(ta, '\n\n{{descriptive\n##### Read Aloud\nText\n}}\n\n')),
+      btn('Page', 'Insert page break', () => insertText(ta, '\n\n\\page\n\n')),
+      h('span', { class: 'sep' }),
+      btn('Image', 'Insert an uploaded image', () => { imgPanel.hidden = !imgPanel.hidden; }));
+    const imgPanel = h('div', { class: 'imgp', hidden: '' }, assetPicker(a => {
+      insertText(ta, '\n\n![' + a.name + '](asset:' + a.name + '){width:240px}\n\n'); imgPanel.hidden = true;
+    }));
+    return h('div', { class: 'rte' }, tb, imgPanel, ta);
+  }
+
+  function buildField(f, d, ctx) {
+    const id = 'f' + (++uid);
+    const wrap = h('div', { class: 'fld', style: '--cols:' + (f.cols || 12) });
+    const change = () => ctx.changed(f);
+    let ctl, showLabel = true;
+
+    if (f.t === 'text') ctl = h('input', { type: 'text', id, value: d[f.k], placeholder: f.ph || '', oninput: e => { d[f.k] = e.target.value; change(); } });
+    else if (f.t === 'num') {
+      const mv = f.mod ? h('span', { class: 'modv', text: mod(d[f.k]) }) : null;
+      ctl = h('input', { type: 'number', inputmode: 'numeric', id, value: d[f.k], placeholder: f.ph || '', min: f.min, max: f.max, oninput: e => { d[f.k] = e.target.value; if (mv) mv.textContent = mod(e.target.value); change(); } });
+      if (mv) ctl = [ctl, mv];
+    } else if (f.t === 'area') ctl = h('textarea', { id, rows: f.rows || 3, value: d[f.k], placeholder: f.ph || '', oninput: e => { d[f.k] = e.target.value; change(); } });
+    else if (f.t === 'sel') {
+      const sel = h('select', { id, onchange: e => { d[f.k] = e.target.value; change(); } },
+        f.nodash ? null : h('option', { value: '', text: '—' }),
+        f.opts.map(o => { const a = Array.isArray(o) ? o : [o, o]; return h('option', { value: a[0], text: a[1] }); }));
+      sel.value = d[f.k]; ctl = sel;
+      ctx.refs[f.k] = sel;
+    } else if (f.t === 'asset') {
+      const sel = h('select', { id, onchange: e => { d[f.k] = e.target.value; fill(); change(); } });
+      const thumb = h('img', { class: 'athumb', alt: '', hidden: '' });
+      const msg = h('span', { class: 'apm', role: 'status' });
+      function fill() {
+        const cur = d[f.k] || '';
+        sel.replaceChildren(h('option', { value: '', text: ASSETS.length || cur ? '—' : 'No images yet' }), ASSETS.map(a => h('option', { value: a.name, text: a.name })));
+        if (cur && !ASSETS.some(a => a.name === cur)) sel.append(h('option', { value: cur, text: cur + ' (missing)' }));
+        sel.value = cur;
+        const a = ASSETS.find(x => x.name === cur);
+        thumb.hidden = !a; if (a) thumb.src = a.url;
+      }
+      fill(); onAssets(sel, fill);
+      const up = uploader(r => { if (r.added.length) { d[f.k] = r.added[0].name; fill(); change(); } msg.textContent = r.msg; });
+      ctl = h('div', { class: 'arow' }, sel, up, thumb, msg);
+      ctx.refs[f.k] = sel;
+    } else if (f.t === 'rich') ctl = buildRich(id, d, f, change);
+    else if (f.t === 'check') {
+      showLabel = false;
+      const cb = h('input', { type: 'checkbox', id, checked: !!d[f.k], onchange: e => { d[f.k] = e.target.checked; change(); } });
+      cb.checked = !!d[f.k];
+      ctl = h('label', { class: 'chk', for: id }, cb, f.l);
+    } else if (f.t === 'toggles' || f.t === 'chips') {
+      const cls = f.t === 'toggles' ? 'tgs' : 'chips', bc = f.t === 'toggles' ? 'tg' : 'chip';
+      const grp = h('div', { class: cls, role: 'group', 'aria-labelledby': id + '-l' });
+      f.opts.forEach(o => {
+        const b = h('button', { type: 'button', class: bc, 'aria-pressed': (d[f.k] || []).includes(o) ? 'true' : 'false', text: o, onclick: () => {
+          const arr = d[f.k] || (d[f.k] = []), i = arr.indexOf(o);
+          if (i >= 0) arr.splice(i, 1); else arr.push(o);
+          arr.sort((x, y) => f.opts.indexOf(x) - f.opts.indexOf(y));
+          b.setAttribute('aria-pressed', i >= 0 ? 'false' : 'true'); change();
+        } });
+        grp.append(b);
+      });
+      ctl = grp;
+    } else if (f.t === 'repeater') { wrap.append(buildRepeater(f, d, ctx)); ctx.items.push({ f, wrap }); return wrap; }
+
+    if (f.t === 'text' || f.t === 'num' || f.t === 'area' || f.t === 'sel') ctx.refs[f.k] = Array.isArray(ctl) ? ctl[0] : ctl;
+
+    if (showLabel) {
+      const help = f.help ? h('p', { class: 'help', hidden: true, text: f.help }) : null;
+      const q = f.help ? h('button', { type: 'button', class: 'q', 'aria-label': 'Help for ' + f.l, text: '?', onclick: () => { help.hidden = !help.hidden; } }) : null;
+      const lab = h('label', { class: 'lab' + (f.lhide ? ' ghost' : ''), for: id, id: id + '-l' }, f.l, f.req ? h('span', { class: 'req', text: ' *' }) : null);
+      wrap.append(h('div', { class: 'lh' }, lab, q));
+      if (help) wrap.append(help);
+      if (f.lhide && ctl && !Array.isArray(ctl)) ctl.setAttribute('aria-label', f.l);
+    }
+    wrap.append(...[].concat(ctl));
+    if (f.hintText) wrap.append(h('p', { class: 'hint', text: f.hintText }));
+    ctx.items.push({ f, wrap });
+    return wrap;
+  }
+
+  function buildRepeater(f, d, ctx) {
+    const box = h('div', { class: 'rep' });
+    const list = d[f.k] || (d[f.k] = []);
+    const render = () => {
+      box.replaceChildren();
+      list.forEach((it, i) => {
+        const sub = { refs: {}, items: [], changed: () => ctx.changed(f) };
+        const grid = h('div', { class: 'fgrid' }, f.sub.map(sf => buildField(sf, it, sub)));
+        const move = (dir) => { const j = i + dir; if (j < 0 || j >= list.length) return; const t = list[i]; list[i] = list[j]; list[j] = t; render(); ctx.changed(f); };
+        const del = h('button', { type: 'button', class: 'iact', title: 'Delete', 'aria-label': 'Delete ' + f.itemLabel, text: '×' });
+        del.addEventListener('click', () => arm(del, 'Delete?', () => { list.splice(i, 1); render(); ctx.changed(f); }));
+        box.append(h('div', { class: 'ritem' },
+          h('div', { class: 'rhead' }, h('strong', { text: f.itemLabel + ' ' + (i + 1) }),
+            h('button', { type: 'button', class: 'iact', title: 'Move up', 'aria-label': 'Move up', text: '↑', onclick: () => move(-1) }),
+            h('button', { type: 'button', class: 'iact', title: 'Move down', 'aria-label': 'Move down', text: '↓', onclick: () => move(1) }), del),
+          grid));
+      });
+      box.append(h('button', { type: 'button', class: 'btn line sm repadd', text: '+ ' + f.addLabel, onclick: () => { list.push(defaults({ fields: f.sub })); render(); ctx.changed(f); const last = box.querySelectorAll('.ritem'); const first = last[last.length - 1] && last[last.length - 1].querySelector('input,textarea'); if (first) first.focus(); } }));
+    };
+    render();
+    return box;
+  }
+
+  /* ---------- Editor ---------- */
+  function editor(type, rec, init) {
+    const T = TYPES[type];
+    const d = Object.assign(defaults(T), rec ? clone(rec.d) : {}, init || {});
+    cur = { id: rec ? rec.id : null, type, d };
+    const out = outPanel('Your page', 'Start filling in the form and your page appears here.');
+    const status = h('span', { class: 'status', role: 'status' });
+    const ctx = { refs: {}, items: [], changed };
+
+    function applyEnable() {
+      ctx.items.forEach(it => {
+        if (!it.f.enable) return;
+        const on = !!it.f.enable(d);
+        it.wrap.classList.toggle('off', !on);
+        it.wrap.querySelectorAll('input,select,textarea,button:not(.q)').forEach(x => { x.disabled = !on; });
+      });
+    }
+    function refreshOut() {
+      const text = T.gen(d);
+      const lines = text ? text.split('\n').length : 0;
+      out.set(text, lines + ' lines', S(d.name));
+    }
+    function refreshStatus() {
+      const miss = T.fields.filter(f => f.req && f.k && (!f.enable || f.enable(d)) && isEmpty(d[f.k])).map(f => f.l);
+      if (!S(d.name) && !cur.id) { status.textContent = 'Enter a name and your work is saved automatically.'; status.className = 'status'; return; }
+      status.className = 'status' + (storeOK ? ' ok' : '');
+      status.textContent = storeOK ? 'Saved on this device' + (miss.length ? ' · Still required: ' + miss.join(', ') : '') : 'Not saved: this browser blocks storage. Copy your code before you leave.';
+    }
+    function changed(f) {
+      if (f && f.k === 'cls') {
+        const prev = S(d.term);
+        if (!prev || Object.values(SUBTERM).includes(prev)) { d.term = SUBTERM[d.cls] || ''; if (ctx.refs.term) ctx.refs.term.value = d.term; }
+      }
+      applyEnable(); refreshOut(); persist(); refreshStatus();
+    }
+
+    const grid = h('div', { class: 'fgrid' });
+    T.fields.forEach(f => {
+      if (f.t === 'section') grid.append(h('div', { class: 'sec' }, h('h2', { text: f.l }), f.help ? h('p', { class: 'sec-help', text: f.help }) : null));
+      else grid.append(buildField(f, d, ctx));
+    });
+
+    const del = h('button', { class: 'btn line', type: 'button', text: 'Delete creation' });
+    del.addEventListener('click', () => arm(del, 'Really delete?', () => { store = store.filter(r => r.id !== cur.id); writeStore(); cur = null; location.hash = '#creations'; }));
+    const foot = h('div', { class: 'edfoot' }, status, h('a', { class: 'btn line', href: '#creations', text: 'My creations' }), h('button', { class: 'btn', type: 'button', text: 'Copy code', onclick: () => copyText(out.pre.textContent, copyStatus) }));
+    const copyStatus = h('span', { class: 'cstatus' }); copyStatus._pre = out.pre;
+    foot.append(copyStatus);
+    if (cur.id) foot.append(del);
+
+    const top = h('div', { class: 'top' },
+      crumbs([['Home', '#home'], ['Creations', '#creations'], [(rec ? 'Edit ' : 'Create a ') + T.name]]),
+      h('div', { class: 'topbtns' }, h('a', { class: 'btn dark', href: '#creations-' + type, text: 'View my ' + T.plural.toLowerCase() }), h('a', { class: 'btn dark', href: '#new-' + type, text: 'Create ' + (/^[aeiou]/i.test(T.name) ? 'an ' : 'a ') + T.name.toLowerCase() })));
+
+    shell('home', top,
+      h('div', { class: 'editor', style: '--acc:' + T.color },
+        h('div', { class: 'form' }, h('h1', { class: 'ptitle', text: (rec ? 'Edit ' : 'Create a ') + T.name }), grid, foot),
+        out.el));
+    applyEnable(); refreshOut(); refreshStatus();
+    const first = app.querySelector('.fgrid input[type=text]'); if (first && !rec) first.focus({ preventScroll: true });
+  }
+
+  /* ---------- Meine Kreationen ---------- */
+  const selected = new Set();
+  let pageBreak = false;
+  function addExamples() {
+    const mk = (type, p) => ({ id: newId(), type, d: Object.assign(defaults(TYPES[type]), p), updated: Date.now() });
+    store.push(
+      mk('spell', { name: 'Ember Dart', version: '1', level: '0', school: 'Evocation', ctNum: '1', ctUnit: 'action', comp: ['V', 'S'], rangeType: 'ranged', rangeDist: '60', durType: 'instant', classes: ['Sorcerer', 'Wizard'], desc: 'You hurl a mote of fire at a creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it is not being worn or carried.\n\nThis spell’s damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10).' }),
+      mk('item', { name: 'Lantern of Last Light', version: '1', itype: 'Wondrous Item', rarity: 'Uncommon', attune: false, desc: 'While lit, this brass lantern sheds bright light in a 30-foot radius and dim light for an additional 30 feet.\n\n***Last Light.*** Once per dawn, when you or a creature within 30 feet of you is reduced to 0 hit points, you can use your reaction to flare the lantern. That creature drops to 1 hit point instead.' }),
+      mk('monster', { name: 'Shadow Wolf', version: '1', size: 'Medium', mtype: 'monstrosity', align: 'chaotic evil', cr: '2', ac: '13', acType: 'natural armor', hp: '37', hpf: '5d8 + 15', walk: '50', str: '17', dex: '15', con: '16', int: '3', wis: '12', cha: '7', skills: 'Perception +3, Stealth +4', senses: 'darkvision 60 ft., passive Perception 13', traits: 'Pack Tactics. The wolf has advantage on an attack roll against a creature if at least one of the wolf’s allies is within 5 feet of the creature and the ally isn’t incapacitated.', actions: 'Bite. *Melee Weapon Attack:* +5 to hit, reach 5 ft., one target. *Hit:* 11 (2d6 + 4) piercing damage. If the target is a creature, it must succeed on a DC 13 Strength saving throw or be knocked prone.' })
+    );
+    writeStore();
+  }
+
+  function creations(filter) {
+    if (filter !== 'all' && !TYPES[filter]) filter = 'all';
+    const list = store.filter(r => filter === 'all' || r.type === filter);
+    const out = outPanel('Your book', 'Tick the creations you want in one book. The pages appear here.');
+    const refreshOut = () => {
+      const picked = store.filter(r => selected.has(r.id));
+      const text = picked.map(r => TYPES[r.type].gen(Object.assign(defaults(TYPES[r.type]), r.d))).join(pageBreak ? '\n\n\\page\n\n' : '\n\n');
+      out.set(text, picked.length + (picked.length === 1 ? ' creation' : ' creations') + ' · ' + (text ? text.split('\n').length : 0) + ' lines', 'homebrew-book');
+    };
+    const counts = k => k === 'all' ? store.length : store.filter(r => r.type === k).length;
+    const filters = h('div', { class: 'filters' }, ['all'].concat(ORDER).map(k => h('a', { class: 'fchip' + (k === filter ? ' on' : ''), href: k === 'all' ? '#creations' : '#creations-' + k, text: (k === 'all' ? 'All' : TYPES[k].plural) + ' (' + counts(k) + ')' })));
+
+    const rows = h('div', { class: 'rows' }, list.map(r => {
+      const T = TYPES[r.type];
+      const d = Object.assign(defaults(T), r.d);
+      const cb = h('input', { type: 'checkbox', 'aria-label': 'Include ' + (S(d.name) || 'creation') + ' in the combined code', checked: selected.has(r.id), onchange: e => { if (e.target.checked) selected.add(r.id); else selected.delete(r.id); refreshOut(); } });
+      cb.checked = selected.has(r.id);
+      const delBtn = h('button', { class: 'btn line sm', type: 'button', text: 'Delete' });
+      delBtn.addEventListener('click', () => arm(delBtn, 'Sure?', () => { store = store.filter(x => x.id !== r.id); selected.delete(r.id); writeStore(); route(); }));
+      return h('div', { class: 'row', style: '--acc:' + T.color },
+        cb, h('span', { class: 'badge', text: T.name }),
+        h('div', { class: 'rmain' }, h('div', { class: 'rname', text: (S(d.name) || 'Unnamed') + (S(d.version) ? ' (v' + S(d.version) + ')' : '') }),
+          h('div', { class: 'rmeta', text: T.meta(d) + ' · ' + new Date(r.updated).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) })),
+        h('div', { class: 'ract' },
+          h('a', { class: 'btn sm', href: '#edit-' + r.id, text: 'Edit' }),
+          h('button', { class: 'btn line sm', type: 'button', text: 'Duplicate', onclick: () => {
+            const c = { id: newId(), type: r.type, d: Object.assign(clone(r.d), { name: S(r.d.name) + ' (copy)' }), updated: Date.now() };
+            store.splice(store.indexOf(r) + 1, 0, c); writeStore(); route();
+          } }), delBtn));
+    }));
+
+    let body;
+    if (!store.length) {
+      body = h('div', { class: 'empty' }, h('div', { text: 'You have not saved any creations yet.' }),
+        h('div', { class: 'cbtns' }, h('a', { class: 'btn', href: '#home', text: 'Create something' }), h('button', { class: 'btn line', type: 'button', text: 'Add 3 example creations', onclick: () => { addExamples(); route(); } })));
+    } else if (!list.length) {
+      body = h('div', { class: 'empty' }, h('div', { text: 'Nothing here yet.' }), h('a', { class: 'btn', href: '#new-' + filter, text: 'Create ' + TYPES[filter].name.toLowerCase() }));
+    } else body = rows;
+
+    const pbCb = h('input', { type: 'checkbox', id: 'pb', onchange: e => { pageBreak = e.target.checked; refreshOut(); } });
+    pbCb.checked = pageBreak;
+    const tools = h('div', { class: 'tools' },
+      h('button', { class: 'btn line sm', type: 'button', text: 'Select all shown', onclick: () => { list.forEach(r => selected.add(r.id)); route(); } }),
+      h('button', { class: 'btn line sm', type: 'button', text: 'Select none', onclick: () => { selected.clear(); route(); } }),
+      h('label', { for: 'pb' }, pbCb, 'Page break between creations'));
+
+    shell('creations',
+      h('div', { class: 'top' }, crumbs([['Home', '#home'], ['Creations']]), h('div', { class: 'topbtns' }, h('a', { class: 'btn dark', href: '#home', text: 'Create new' }))),
+      h('h1', { class: 'ptitle', text: 'My Creations' }),
+      storeOK ? null : h('div', { class: 'note', text: 'This browser blocks storage, so creations are kept only until you close this page. Copy your code before you leave.' }),
+      h('div', { class: 'editor' }, h('div', { style: 'min-width:0' }, filters, store.length ? tools : null, body), out.el));
+    refreshOut();
+  }
+
+  /* ---------- Routing ---------- */
+  function route() {
+    const hs = (location.hash || '#home').slice(1) || 'home';
+    let m;
+    if (hs === 'new-subclass') subclassPicker();
+    else if ((m = hs.match(/^new-subclass-([a-z]+)$/))) {
+      const cls = CLASSES.find(c => lower(c) === m[1]) || '';
+      const init = pendingTemplate || { cls, term: SUBTERM[cls] || '' };
+      pendingTemplate = null;
+      editor('subclass', null, init);
+    }
+    else if ((m = hs.match(/^new-([a-z]+)$/)) && TYPES[m[1]]) editor(m[1], null, null);
+    else if ((m = hs.match(/^edit-([a-z0-9]+)$/))) {
+      const rec = store.find(r => r.id === m[1]);
+      if (rec) editor(rec.type, rec, null); else { location.hash = '#creations'; }
+    }
+    else if (hs === 'assets') assetsPage();
+    else if (hs === 'creations') creations('all');
+    else if ((m = hs.match(/^creations-([a-z]+)$/))) creations(m[1]);
+    else home();
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
