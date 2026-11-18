@@ -1165,7 +1165,7 @@ expr-eval/dist/index.mjs:
   }
   function shell(active, ...content) {
     app.replaceChildren(topbar(active), h('main', { class: 'in main' }, content),
-      h('footer', { class: 'in about' }, 'Unofficial fan tool, vibe-coded with Claude (Anthropic). Not affiliated with or endorsed by Wizards of the Coast, D&D Beyond or Homebrewery. Dungeons & Dragons is a trademark of Wizards of the Coast LLC.'));
+      h('footer', { class: 'in about' }, 'Unofficial fan tool, vibe-coded with Claude (Anthropic). Not affiliated with or endorsed by Wizards of the Coast, D&D Beyond or Homebrewery. Dungeons & Dragons is a trademark of Wizards of the Coast LLC. ', h('a', { href: 'https://github.com/felicius1208/homebrewery-workshop', target: '_blank', rel: 'noopener', text: 'Source code on GitHub' }), '.'));
     window.scrollTo(0, 0);
   }
   function crumbs(items) {
