@@ -6,6 +6,8 @@ An unofficial, form-based editor for D&D 5e homebrew. Pick a type (spell, magic 
 
 Not affiliated with or endorsed by Wizards of the Coast, D&D Beyond or The Homebrewery. Dungeons & Dragons is a trademark of Wizards of the Coast LLC. This repository contains no official rules text, artwork or branding.
 
+GitHub pages website https://felicius1208.github.io/homebrewery-workshop/
+
 ## Features
 
 - Editors for spells, magic items, monsters, feats, backgrounds, species and subclasses
